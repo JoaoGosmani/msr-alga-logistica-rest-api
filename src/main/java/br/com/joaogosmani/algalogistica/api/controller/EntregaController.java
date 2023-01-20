@@ -15,6 +15,8 @@ import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.ResponseStatus;
 import org.springframework.web.bind.annotation.RestController;
 
+import br.com.joaogosmani.algalogistica.api.model.DestinatarioModel;
+import br.com.joaogosmani.algalogistica.api.model.EntregaModel;
 import br.com.joaogosmani.algalogistica.domain.model.Entrega;
 import br.com.joaogosmani.algalogistica.domain.repository.EntregaRepository;
 import br.com.joaogosmani.algalogistica.domain.service.SolicitacaoEntregaService;
@@ -41,10 +43,25 @@ public class EntregaController {
 	}
 	
 	@GetMapping("/{id}")
-	public ResponseEntity<Entrega> buscar(@PathVariable Long id) {
+	public ResponseEntity<EntregaModel> buscar(@PathVariable Long id) {
 		return entregaRepository.findById(id)
-				.map(ResponseEntity::ok)
-				.orElse(ResponseEntity.notFound().build());
+				.map(entrega -> {
+					EntregaModel entregaModel = new EntregaModel();
+					entregaModel.setId(entrega.getId());
+					entregaModel.setNomeCliente(entrega.getCliente().getNome());
+					entregaModel.setDestinatario(new DestinatarioModel());
+					entregaModel.getDestinatario().setNome(entrega.getDestinatario().getNome());
+					entregaModel.getDestinatario().setLogradouro(entrega.getDestinatario().getLogradouro());
+					entregaModel.getDestinatario().setNumero(entrega.getDestinatario().getNumero());
+					entregaModel.getDestinatario().setComplemento(entrega.getDestinatario().getComplemento());
+					entregaModel.getDestinatario().setBairro(entrega.getDestinatario().getBairro());
+					entregaModel.setTaxa(entrega.getTaxa());
+					entregaModel.setStatus(entrega.getStatus());
+					entregaModel.setDataPedido(entrega.getDataPedido());
+					entregaModel.setDataFinalizacao(entrega.getDataFinalizacao());
+					
+					return ResponseEntity.ok(entregaModel);
+				}).orElse(ResponseEntity.notFound().build());
 	}
 	
 }
